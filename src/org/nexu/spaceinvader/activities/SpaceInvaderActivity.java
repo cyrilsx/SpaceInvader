@@ -1,7 +1,6 @@
 package org.nexu.spaceinvader.activities;
 
 import org.nexu.spaceinvader.R;
-import org.nexu.spaceinvader.R.layout;
 import org.nexu.spaceinvader.customsview.SpacePanel;
 
 import android.app.Activity;

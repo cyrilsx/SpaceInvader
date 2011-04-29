@@ -9,14 +9,14 @@ public class WorldBuilder {
 	
 	
 	private SpaceShip ship;
-	private List<Element> elements;
+	private List<Movable> elements;
 	private int elementNumber = 0;
 	private EnemyBehaviour enemyBehaviour;
 	/**
 	 * Singleton
 	 */
 	private WorldBuilder() {
-		elements = new ArrayList<Element>();
+		elements = new ArrayList<Movable>();
 	}
 	
 	public static WorldBuilder getInstance() {
@@ -27,11 +27,11 @@ public class WorldBuilder {
 		private static final WorldBuilder instance = new WorldBuilder();
 	}
 	
-	public List<Element> getAllWorldElement() {
+	public List<Movable> getAllWorldElement() {
 		return elements;
 	}
 	
-	public Element getShip() {
+	public Movable getShip() {
 		return ship;
 	}
 	

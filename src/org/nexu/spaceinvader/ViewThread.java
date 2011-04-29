@@ -33,7 +33,7 @@ public class ViewThread extends Thread {
 			canvas = holder.lockCanvas();
 			if(canvas != null) {
 				panel.animate(elapsed);
-				panel.doDraw(elapsed,canvas);
+				panel.doDraw(elapsed, canvas);
 				elapsed = System.currentTimeMillis() - startTime;
 				holder.unlockCanvasAndPost(canvas);
 			}

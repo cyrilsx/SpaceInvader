@@ -16,7 +16,7 @@ public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	// private Bitmap space;
 	private ViewThread thread;
-	private List<Element> elements = new ArrayList<Element>();
+	private List<Movable> elements = new ArrayList<Movable>();
 	private Paint wPaint;
 	private WorldBuilder world;
 
@@ -27,13 +27,14 @@ public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 		super(context);
 		world = WorldBuilder.getInstance();
 		world.buildMainShip(BitmapFactory.decodeResource(getResources(),
-				R.drawable.alienblaster), this.getWidth() / 2, this.getHeight() - 10);
+				R.drawable.alienblaster), this.getWidth() / 2,
+				this.getHeight() - 10);
 		world.buildEnemies(BitmapFactory.decodeResource(getResources(),
 				R.drawable.thermaldetonator), 5);
 		getHolder().addCallback(this);
 		thread = new ViewThread(this);
 		// setFocusable(true);
-		wPaint =  new Paint();
+		wPaint = new Paint();
 		wPaint.setColor(Color.WHITE);
 	}
 
@@ -41,7 +42,7 @@ public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 		canvas.drawColor(Color.BLACK);
 		elements = world.getAllWorldElement();
 		synchronized (elements) {
-			for (Element element : elements) {
+			for (Movable element : elements) {
 				element.doDraw(canvas);
 			}
 		}
@@ -84,7 +85,7 @@ public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 	public void animate(long elapsedTime) {
 		elements = world.getAllWorldElement();
 		synchronized (elements) {
-			for (Element element : elements) {
+			for (Movable element : elements) {
 				element.animate(elapsedTime);
 			}
 		}

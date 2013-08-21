@@ -1,10 +1,9 @@
 package org.nexu.spaceinvader.behaviours;
 
-import android.graphics.Canvas;
+import org.nexu.spaceinvader.domain.Shape;
 
-public interface Movable {
+public interface Movable extends Shape{
 
-	public void doDraw(Canvas canvas);
 	
 	public void animate(long elipsed);
 	

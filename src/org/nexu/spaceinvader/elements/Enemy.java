@@ -2,18 +2,21 @@ package org.nexu.spaceinvader.elements;
 
 import java.util.Random;
 
-import org.nexu.spaceinvader.customsview.SpacePanel;
-
 import android.graphics.Bitmap;
+import android.util.Log;
+import org.nexu.spaceinvader.data.domain.ShapeDescriptor;
 
 public class Enemy extends Element{
 
+	private static final String TAG = "ENEMY";
 	
-	public Enemy(Bitmap image, int posX, int posY) {
-		super(posX,posY,image);
+	
+	public Enemy(Bitmap image, int posX, int posY, int screenWitdh, int screenHeight, ShapeDescriptor.TypeShape typeShape, int health) {
+		super(posX,posY,image, screenWitdh, screenHeight, typeShape, health);
 		Random rand = new Random();
-		speedX = rand.nextInt(7) - 3;
-		speedY = rand.nextInt(7) - 3;
+		speedX = rand.nextInt(7);
+		speedY = rand.nextInt(7);
+		Log.d(TAG, "Create a new enemy: " +  this);
 	}
 
 	@Override
@@ -24,22 +27,31 @@ public class Enemy extends Element{
 
 	@Override
 	protected void checkBorders() {
-		if (posX <= 0) {
+		if (posX <= screenWitdh / 2) {
 			speedX = -speedX;
-			posX = 0;
-		} else if (posX + bitmap.getWidth() >= SpacePanel.width) {
+			posX = screenWitdh / 2;
+		} else if (posX + bitmap.getWidth() >= screenWitdh) {
 			speedX = -speedX;
-			posX = (int) (SpacePanel.width - bitmap.getWidth());
+			posX = (int) (screenWitdh - bitmap.getWidth());
 		}
 		if (posY <= 0) {
 			posY = 0;
 			speedY = -speedY;
 		}
-		if (posY + bitmap.getHeight() >= SpacePanel.height /2) {
+		if (posY + bitmap.getHeight() >= screenHeight) {
 			speedY = -speedY;
-			posY = (int) (SpacePanel.height /2 - bitmap.getHeight());
+			posY = (int) (screenHeight - bitmap.getHeight());
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return "Enemy[(x,y) = (" + posX + "," + posY +")" + " -- (sX, sY(" + speedX + "," + speedY +")";  
+	}
 
+
+    @Override
+    public void onCollision(Element srcObject) {
+        decreaseLife(srcObject.getCollisionDamage());
+    }
 }

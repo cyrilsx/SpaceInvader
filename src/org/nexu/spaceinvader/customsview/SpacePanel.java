@@ -3,13 +3,13 @@ package org.nexu.spaceinvader.customsview;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.nexu.spaceinvader.R;
-import org.nexu.spaceinvader.R.drawable;
+import org.nexu.spaceinvader.activities.GameContext;
 import org.nexu.spaceinvader.behaviours.Movable;
-import org.nexu.spaceinvader.elements.WorldBuilder;
+import org.nexu.spaceinvader.behaviours.controller.CollisionController;
+import org.nexu.spaceinvader.domain.Shape;
+import org.nexu.spaceinvader.events.ScreenDimensionChanged;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -19,40 +19,61 @@ import android.view.SurfaceView;
 
 public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 
-	// private Bitmap space;
 	private ViewThread thread;
-	private List<Movable> elements = new ArrayList<Movable>();
+	private List<Shape> elements = new ArrayList<Shape>();
+	private GameContext mGameContext;
 	private Paint wPaint;
-	private WorldBuilder world;
 
-	public static float width;
-	public static float height;
+    private CollisionController collisionController;
+
+	public float width;
+	public float height;
 
 	public SpacePanel(Context context) {
 		super(context);
-		world = WorldBuilder.getInstance();
-		world.buildMainShip(BitmapFactory.decodeResource(getResources(),
-				R.drawable.alienblaster), this.getWidth() / 2,
-				this.getHeight() - 10);
-		world.buildEnemies(BitmapFactory.decodeResource(getResources(),
-				R.drawable.thermaldetonator), 5);
+		mGameContext = GameContext.loadContext(getContext(), this);
+		
 		getHolder().addCallback(this);
 		thread = new ViewThread(this);
-		// setFocusable(true);
 		wPaint = new Paint();
 		wPaint.setColor(Color.WHITE);
 	}
 
+    public void setCollisionController(CollisionController collisionController) {
+        this.collisionController = collisionController;
+    }
+
+    public void addShape(Shape shape) {
+		synchronized (elements) {
+			elements.add(shape);
+		}
+	}
+	
+	public void removeShape(Shape shape) {
+		synchronized (elements) {
+			elements.remove(shape);
+		}
+	}
+
 	public void doDraw(long elapsed, Canvas canvas) {
 		canvas.drawColor(Color.BLACK);
-		elements = world.getAllWorldElement();
+		List<Shape> elementIndex = new ArrayList<Shape>();
 		synchronized (elements) {
-			for (Movable element : elements) {
+			for (Shape element : elements) {
+				if(element.isOutOfScreen(width, height) || element.isHidden()) {
+					elementIndex.add(element);
+				}
 				element.doDraw(canvas);
 			}
 		}
+
+        collisionController.checkForCollision();
+
+		for(Shape cleanUp : elementIndex) {
+			elements.remove(cleanUp);
+		}
 		canvas.drawText("FPS: " + Math.round(1000f / elapsed) + " Elements: "
-				+ world.getWorldSize(), 10, 10, wPaint);
+				+ elements.size(), 10, 10, wPaint);
 	}
 
 	@Override
@@ -60,7 +81,8 @@ public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 			int height) {
 		this.width = width;
 		this.height = height;
-
+		
+		mGameContext.getEventBus().publish(new ScreenDimensionChanged(height, width));
 	}
 
 	@Override
@@ -83,17 +105,20 @@ public class SpacePanel extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		world.getShip().changePosition((int) event.getX(), (int) event.getY());
-		return super.onTouchEvent(event);
+		return mGameContext.getGuiEventManager().onTouch(this, event);
 	}
+	
 
 	public void animate(long elapsedTime) {
-		elements = world.getAllWorldElement();
 		synchronized (elements) {
-			for (Movable element : elements) {
-				element.animate(elapsedTime);
+			for (Shape element : elements) {
+				if(element instanceof Movable) {
+					Movable movable = (Movable) element;
+					movable.animate(elapsedTime);					
+				}
 			}
 		}
 	}
 
 }
+
